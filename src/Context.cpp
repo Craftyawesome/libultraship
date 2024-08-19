@@ -14,6 +14,8 @@
 
 #ifdef __APPLE__
 #include "utils/AppleFolderManager.h"
+#elif defined(__SWITCH__)
+#include "port/switch/SwitchImpl.h"
 #endif
 
 namespace Ship {
@@ -200,6 +202,9 @@ void Context::InitResourceManager(const std::vector<std::string>& otrFiles,
     }
 
     if (!GetResourceManager()->DidLoadSuccessfully()) {
+#if defined(__SWITCH__)
+        printf("Main OTR file not found!\n");
+#else
         SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "OTR file not found",
                                  "Main OTR file not found. Please generate one", nullptr);
         SPDLOG_ERROR("Main OTR file not found!");
@@ -207,8 +212,12 @@ void Context::InitResourceManager(const std::vector<std::string>& otrFiles,
         // We need this exit to close the app when we dismiss the dialog
         exit(0);
 #endif
+#endif
         return;
     }
+#ifdef __SWITCH__
+    Ship::Switch::Init(PostInitPhase);
+#endif
 }
 
 void Context::InitControlDeck(std::vector<CONTROLLERBUTTONS_T> additionalBitmasks) {
